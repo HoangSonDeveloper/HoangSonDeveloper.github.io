@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import {
   Button,
   Card,
@@ -12,6 +12,7 @@ import {
   Upload,
 } from 'antd';
 import { useAuth } from '../context/AuthContext';
+import api from '../axios';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -23,6 +24,29 @@ const courses = ['Course 1', 'Course 2'];
 
 const Profile: FC<any> = () => {
   const { logout } = useAuth();
+  const [jobs, setJobs] = useState([]);
+  const [selectedJob, setSelectedJob] = useState('');
+  const [recommendCourses, setRecommendCourses] = useState([]);
+  useEffect(() => {
+    getCourses();
+  }, []);
+
+  const getCourses = async () => {
+    await api.get('/jobs').then(res => setJobs(res?.data?.titles));
+  };
+
+  const onFindCourses = async () => {
+    await api
+      .post('/user/recommendation', { job_title: selectedJob })
+      .then(res => setRecommendCourses(res?.data?.courses));
+  };
+
+  const formattedJobs = jobs?.map(job => {
+    return {
+      value: job,
+      label: job,
+    };
+  });
 
   const dropDownItems = {
     items: [
@@ -88,20 +112,13 @@ const Profile: FC<any> = () => {
             <Row className={'mb-3'}>
               <Select
                 className={'w-full'}
-                options={[
-                  {
-                    value: '1',
-                    label: 'Javascript',
-                  },
-                  {
-                    value: '2',
-                    label: 'Typescript',
-                  },
-                ]}
+                onChange={value => setSelectedJob(value)}
+                options={formattedJobs}
               />
             </Row>
             <Row>
               <Button
+                onClick={onFindCourses}
                 style={{
                   background: '#198754',
                   textTransform: 'uppercase',
@@ -114,20 +131,28 @@ const Profile: FC<any> = () => {
           </Card>
         </Col>
         <Col className={'h-full'} xs={{ span: 24 }} xl={{ span: 12 }}>
-          <Card
-            style={{ height: '100%' }}
-            className={'w-full h-full'}
-            title={'Recommended courses'}
-          >
-            {courses.map(course => {
-              return (
-                <Row className={'justify-between m-4'}>
-                  <Text>{course}</Text>
-                  <Button>Show more</Button>
-                </Row>
-              );
-            })}
-          </Card>
+          <Row className={'mb-8'}>
+            <Text className={'text-2xl'}>Recommended courses</Text>
+          </Row>
+          {recommendCourses.map(course => {
+            return (
+              <Card className={'mb-4'}>
+                <Col className={'justify-between'}>
+                  <Text className={'text-lg font-bold flex'}>
+                    {course?.title}
+                  </Text>
+                  <Text className={'flex'}>{course?.description}</Text>
+                  <Text
+                    className={'flex'}
+                  >{`Instructor: ${course?.instructor}`}</Text>
+                  <Text className={'flex'}>{`Rating: ${course?.rating}`}</Text>
+                  <a target="_blank" href={course?.url}>
+                    Go to course
+                  </a>
+                </Col>
+              </Card>
+            );
+          })}
         </Col>
       </Row>
     );

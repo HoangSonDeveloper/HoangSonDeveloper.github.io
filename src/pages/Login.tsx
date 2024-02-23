@@ -21,8 +21,9 @@ const Login: FC<any> = ({ history }) => {
   const onLogin = async values => {
     const { email, password } = values;
     try {
-      await axios.post('/login', { username: email, password }).then(value => {
-        login(values);
+      await axios.post('/login', { username: email, password }).then(res => {
+        login(res);
+        navigate('/profile');
       });
     } catch (e) {
       console.log(e);

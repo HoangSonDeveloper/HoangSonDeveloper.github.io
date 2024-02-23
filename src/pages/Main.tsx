@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -14,6 +14,7 @@ import {
 } from 'antd';
 import { useAuth } from '../context/AuthContext';
 import { InboxOutlined } from '@ant-design/icons';
+import api from '../axios';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -22,6 +23,14 @@ const { Dragger } = Upload;
 const processors = ['NER', 'BERT'];
 
 const Main: FC<any> = () => {
+  useEffect(() => {
+    getCourses();
+  }, []);
+
+  const getCourses = async () => {
+    await api.get('/courses').then(res => console.log(res));
+  };
+
   const { logout } = useAuth();
 
   const dropDownItems = {

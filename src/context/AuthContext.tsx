@@ -26,9 +26,10 @@ export const AuthProvider: FC<any> = ({ children, history }) => {
     }
   }, []);
 
-  const login = (values: any) => {
-    if (values?.data?.access_token) {
-      localStorage.setItem('token', values?.data?.access_token);
+  const login = (res: any) => {
+    console.log(res);
+    if (res?.data?.access_token) {
+      localStorage.setItem('token', res?.data?.access_token);
       setIsAuthenticated(true);
     }
   };

@@ -135,7 +135,7 @@ const Register: FC<any> = ({ history }) => {
             <Row className={'justify-between w-full'}>
               <Button
                 onClick={() => {
-                  navigate('/login');
+                  navigate('/');
                 }}
                 style={{ color: '#438ED2' }}
                 className={'p-0 text-lg mb-2'}
