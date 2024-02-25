@@ -9,18 +9,12 @@ import {
   Row,
   Select,
   Typography,
-  Upload,
 } from 'antd';
 import { useAuth } from '../context/AuthContext';
 import api from '../axios';
 
 const { Header } = Layout;
 const { Text } = Typography;
-const { Dragger } = Upload;
-
-const processors = ['NER', 'BERT'];
-
-const courses = ['Course 1', 'Course 2'];
 
 const Profile: FC<any> = () => {
   const { logout } = useAuth();
@@ -104,14 +98,14 @@ const Profile: FC<any> = () => {
   const renderContent = () => {
     return (
       <Row gutter={[24, 24]} className={'p-8'}>
-        <Col className={'h-full'} xs={{ span: 24 }} xl={{ span: 12 }}>
+        <Col className={'h-full sticky'} span={24}>
           <Card
-            className={'w-full mb-5'}
+            className={'w-full h-60 mb-5'}
             title={'Add skill that you want to learn'}
           >
             <Row className={'mb-3'}>
               <Select
-                className={'w-full'}
+                className={'w-full max-w-2xl h-10 mb-4'}
                 onChange={value => setSelectedJob(value)}
                 options={formattedJobs}
               />
@@ -130,23 +124,55 @@ const Profile: FC<any> = () => {
             </Row>
           </Card>
         </Col>
-        <Col className={'h-full'} xs={{ span: 24 }} xl={{ span: 12 }}>
+        <Col className={'h-full'} span={24}>
           <Row className={'mb-8'}>
             <Text className={'text-2xl'}>Recommended courses</Text>
           </Row>
+          {recommendCourses?.length === 0 && (
+            <Text className={'text-lg'}>
+              Do not have any recommended courses
+            </Text>
+          )}
           {recommendCourses.map(course => {
+            let ratingColor = 'green';
+            if (course?.rating < 3.5) {
+              ratingColor = 'orange';
+            }
+            if (course?.rating < 2.5) {
+              ratingColor = 'red';
+            }
             return (
               <Card className={'mb-4'}>
                 <Col className={'justify-between'}>
                   <Text className={'text-lg font-bold flex'}>
                     {course?.title}
                   </Text>
-                  <Text className={'flex'}>{course?.description}</Text>
+                  <Text style={{ fontSize: 16 }} className={'flex'}>
+                    {course?.description}
+                  </Text>
                   <Text
+                    style={{ fontSize: 16 }}
                     className={'flex'}
                   >{`Instructor: ${course?.instructor}`}</Text>
-                  <Text className={'flex'}>{`Rating: ${course?.rating}`}</Text>
-                  <a target="_blank" href={course?.url}>
+                  <Text className={'flex'} style={{ fontSize: 16 }}>
+                    Rating:
+                    <Text
+                      className={'font-bold'}
+                      style={{
+                        color: ratingColor,
+                        marginLeft: 4,
+                        fontSize: 16,
+                      }}
+                    >
+                      {course?.rating}
+                    </Text>
+                  </Text>
+                  <a
+                    style={{ fontSize: 16 }}
+                    className={'font-bold'}
+                    target="_blank"
+                    href={course?.url}
+                  >
                     Go to course
                   </a>
                 </Col>

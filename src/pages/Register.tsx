@@ -74,7 +74,16 @@ const Register: FC<any> = ({ history }) => {
             </Col>
           </Form.Item>
           <Form.Item
-            rules={[{ required: true, message: 'Password is required' }]}
+            rules={[
+              {
+                required: true,
+                message: 'Please input your password!',
+              },
+              {
+                min: 6,
+                message: 'Password must be at least 6 characters long!',
+              },
+            ]}
             name={'password'}
           >
             <Col>
@@ -90,7 +99,9 @@ const Register: FC<any> = ({ history }) => {
                   Password
                 </Text>
               </Row>
-              <Input className={'w-full mt-2 h-16 border-0 bg-gray-200'} />
+              <Input.Password
+                className={'w-full mt-2 h-16 border-0 bg-gray-200'}
+              />
             </Col>
           </Form.Item>
           <Form.Item
@@ -128,7 +139,9 @@ const Register: FC<any> = ({ history }) => {
                   Re-enter password
                 </Text>
               </Row>
-              <Input className={'w-full mt-2 h-16 border-0 bg-gray-200'} />
+              <Input.Password
+                className={'w-full mt-2 h-16 border-0 bg-gray-200'}
+              />
             </Col>
           </Form.Item>
           <Form.Item>
