@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Card,
@@ -7,43 +7,32 @@ import {
   Image,
   Layout,
   Row,
-  Select,
   Typography,
 } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../axios';
 
 const { Header } = Layout;
 const { Text } = Typography;
-
-const Profile: FC<any> = () => {
+const Profile = () => {
   const { logout } = useAuth();
-  const [jobs, setJobs] = useState([]);
-  const [selectedJob, setSelectedJob] = useState('');
-  const [recommendCourses, setRecommendCourses] = useState([]);
-  useEffect(() => {
-    getCourses();
-  }, []);
-
-  const getCourses = async () => {
-    await api.get('/jobs').then(res => setJobs(res?.data?.titles));
-  };
-
-  const onFindCourses = async () => {
-    await api
-      .post('/user/recommendation', { job_title: selectedJob })
-      .then(res => setRecommendCourses(res?.data?.courses));
-  };
-
-  const formattedJobs = jobs?.map(job => {
-    return {
-      value: job,
-      label: job,
-    };
-  });
-
+  const navigate = useNavigate();
   const dropDownItems = {
     items: [
+      {
+        key: 1,
+        label: (
+          <Button
+            type={'text'}
+            onClick={() => {
+              navigate('/dashboard');
+            }}
+          >
+            Dash board
+          </Button>
+        ),
+      },
       {
         key: 1,
         label: (
@@ -53,6 +42,22 @@ const Profile: FC<any> = () => {
         ),
       },
     ],
+  };
+
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    getCourses();
+  }, []);
+
+  const getCourses = async () => {
+    try {
+      await api
+        .get('/user/courses')
+        .then(res => setCourses(res?.data?.courses));
+    } catch (e) {
+      console.log('Error on getting courses!!!', e);
+    }
   };
 
   const renderHeader = () => {
@@ -95,95 +100,92 @@ const Profile: FC<any> = () => {
     );
   };
 
+  const renderCoursesItem = course => {
+    let ratingColor = 'green';
+    if (course?.rating < 3.5) {
+      ratingColor = 'orange';
+    }
+    if (course?.rating < 2.5) {
+      ratingColor = 'red';
+    }
+    return (
+      <Card className={'mb-4'}>
+        <Col className={'justify-between'}>
+          <Text className={'text-lg font-bold flex'}>{course?.title}</Text>
+          <Text style={{ fontSize: 16 }} className={'flex'}>
+            {course?.description}
+          </Text>
+          <Text
+            style={{ fontSize: 16 }}
+            className={'flex'}
+          >{`Instructor: ${course?.instructor}`}</Text>
+          <Text className={'flex'} style={{ fontSize: 16 }}>
+            Rating:
+            <Text
+              className={'font-bold'}
+              style={{
+                color: ratingColor,
+                marginLeft: 4,
+                fontSize: 16,
+              }}
+            >
+              {course?.rating}
+            </Text>
+          </Text>
+          <a
+            style={{ fontSize: 16 }}
+            className={'font-bold'}
+            target="_blank"
+            href={course?.url}
+          >
+            Go to course
+          </a>
+        </Col>
+      </Card>
+    );
+  };
   const renderContent = () => {
     return (
-      <Row gutter={[24, 24]} className={'p-8'}>
-        <Col className={'h-full sticky'} span={24}>
-          <Card
-            className={'w-full h-60 mb-5'}
-            title={'Add skill that you want to learn'}
-          >
-            <Row className={'mb-3'}>
-              <Select
-                className={'w-full max-w-2xl h-10 mb-4'}
-                onChange={value => setSelectedJob(value)}
-                options={formattedJobs}
-              />
-            </Row>
-            <Row>
-              <Button
-                onClick={onFindCourses}
-                style={{
-                  background: '#198754',
-                  textTransform: 'uppercase',
-                  color: 'white',
-                }}
-              >
-                Find course
-              </Button>
-            </Row>
-          </Card>
-        </Col>
-        <Col className={'h-full'} span={24}>
-          <Row className={'mb-8'}>
-            <Text className={'text-2xl'}>Recommended courses</Text>
+      <Row style={{ padding: 24 }} className={'w-full'}>
+        <Card title={'User info'} className={'w-full mb-4'}>
+          <Row>
+            <Col span={24}>
+              <Text>Name: Son Nguyen</Text>
+            </Col>
+            <Col span={24}>
+              <Text>Mail: abc@gmail.com</Text>
+            </Col>
           </Row>
-          {recommendCourses?.length === 0 && (
-            <Text className={'text-lg'}>
-              Do not have any recommended courses
-            </Text>
-          )}
-          {recommendCourses.map(course => {
-            let ratingColor = 'green';
-            if (course?.rating < 3.5) {
-              ratingColor = 'orange';
-            }
-            if (course?.rating < 2.5) {
-              ratingColor = 'red';
-            }
-            return (
-              <Card className={'mb-4'}>
-                <Col className={'justify-between'}>
-                  <Text className={'text-lg font-bold flex'}>
-                    {course?.title}
+        </Card>
+        <Col className={'w-full'}>
+          <Text className={'text-2xl font-bold'}>Favorite courses</Text>
+          <Col className={'mt-4'}>
+            {courses?.length > 0 ? (
+              courses.map(course => renderCoursesItem(course))
+            ) : (
+              <Col>
+                <Col className={'mb-2'}>
+                  <Text className={'text-lg'}>
+                    Go to dashboard to explore more courses.
                   </Text>
-                  <Text style={{ fontSize: 16 }} className={'flex'}>
-                    {course?.description}
-                  </Text>
-                  <Text
-                    style={{ fontSize: 16 }}
-                    className={'flex'}
-                  >{`Instructor: ${course?.instructor}`}</Text>
-                  <Text className={'flex'} style={{ fontSize: 16 }}>
-                    Rating:
-                    <Text
-                      className={'font-bold'}
-                      style={{
-                        color: ratingColor,
-                        marginLeft: 4,
-                        fontSize: 16,
-                      }}
-                    >
-                      {course?.rating}
-                    </Text>
-                  </Text>
-                  <a
-                    style={{ fontSize: 16 }}
-                    className={'font-bold'}
-                    target="_blank"
-                    href={course?.url}
-                  >
-                    Go to course
-                  </a>
                 </Col>
-              </Card>
-            );
-          })}
+                <Col>
+                  <Button
+                    className={'bg-white'}
+                    onClick={() => {
+                      navigate('/dashboard');
+                    }}
+                  >
+                    Go to dashboard
+                  </Button>
+                </Col>
+              </Col>
+            )}
+          </Col>
         </Col>
       </Row>
     );
   };
-
   return (
     <Layout>
       <>

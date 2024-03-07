@@ -30,11 +30,13 @@ export const AuthProvider: FC<any> = ({ children, history }) => {
     console.log(res);
     if (res?.data?.access_token) {
       localStorage.setItem('token', res?.data?.access_token);
+      localStorage.setItem('user_id', res?.data?.user_id);
       setIsAuthenticated(true);
     }
   };
   const logout = () => {
-    localStorage.removeItem('token'); // Remove token from localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
     setIsAuthenticated(false);
   };
 

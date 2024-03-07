@@ -1,5 +1,14 @@
 import React, { FC, useEffect } from 'react';
-import { Button, Col, Form, Input, Layout, Row, Typography } from 'antd';
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Layout,
+  message,
+  Row,
+  Typography,
+} from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -9,8 +18,9 @@ const { Content } = Layout;
 const { Text } = Typography;
 const Register: FC<any> = ({ history }) => {
   const [form] = Form.useForm();
-  const { login, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -28,11 +38,13 @@ const Register: FC<any> = ({ history }) => {
         });
     } catch (e) {
       console.log(e);
+      messageApi.error(e?.message);
     }
   };
 
   return (
     <Layout>
+      {contextHolder}
       <Content
         style={{ height: '100vh' }}
         className={'justify-center items-center flex flex-col px-4'}
@@ -59,7 +71,7 @@ const Register: FC<any> = ({ history }) => {
           >
             <Col>
               <Row>
-                <LockOutlined
+                <MailOutlined
                   style={{ color: '#2C4466' }}
                   className={'text-lg mr-2 font-medium'}
                 />
@@ -70,7 +82,7 @@ const Register: FC<any> = ({ history }) => {
                   Email address
                 </Text>
               </Row>
-              <Input className={'w-full mt-2 h-16 border-0 bg-gray-200'} />
+              <Input className={'w-full mt-2 h-16'} />
             </Col>
           </Form.Item>
           <Form.Item
@@ -88,7 +100,7 @@ const Register: FC<any> = ({ history }) => {
           >
             <Col>
               <Row>
-                <MailOutlined
+                <LockOutlined
                   style={{ color: '#2C4466' }}
                   className={'text-lg mr-2 font-medium'}
                 />
@@ -99,9 +111,7 @@ const Register: FC<any> = ({ history }) => {
                   Password
                 </Text>
               </Row>
-              <Input.Password
-                className={'w-full mt-2 h-16 border-0 bg-gray-200'}
-              />
+              <Input.Password className={'w-full mt-2 h-16'} />
             </Col>
           </Form.Item>
           <Form.Item
@@ -128,10 +138,11 @@ const Register: FC<any> = ({ history }) => {
           >
             <Col>
               <Row>
-                <MailOutlined
+                <LockOutlined
                   style={{ color: '#2C4466' }}
                   className={'text-lg mr-2 font-medium'}
                 />
+
                 <Text
                   style={{ color: '#2C4466' }}
                   className={'text-lg font-medium'}
@@ -139,9 +150,7 @@ const Register: FC<any> = ({ history }) => {
                   Re-enter password
                 </Text>
               </Row>
-              <Input.Password
-                className={'w-full mt-2 h-16 border-0 bg-gray-200'}
-              />
+              <Input.Password className={'w-full mt-2 h-16'} />
             </Col>
           </Form.Item>
           <Form.Item>

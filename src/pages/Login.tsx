@@ -1,5 +1,14 @@
 import React, { FC, useEffect } from 'react';
-import { Button, Col, Form, Input, Layout, Row, Typography } from 'antd';
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Layout,
+  Row,
+  Typography,
+  message,
+} from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +20,7 @@ const Login: FC<any> = ({ history }) => {
   const [form] = Form.useForm();
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-
+  const [messageApi, contextHolder] = message.useMessage();
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/profile');
@@ -19,19 +28,21 @@ const Login: FC<any> = ({ history }) => {
   }, [isAuthenticated]);
 
   const onLogin = async values => {
-    const { email, password } = values;
+    const { username, password } = values;
     try {
-      await axios.post('/login', { username: email, password }).then(res => {
+      await axios.post('/login', { username, password }).then(res => {
         login(res);
         navigate('/profile');
       });
     } catch (e) {
       console.log(e);
+      messageApi.error(e?.message);
     }
   };
 
   return (
     <Layout>
+      {contextHolder}
       <Content
         style={{ height: '100vh' }}
         className={'justify-center items-center flex flex-col px-4'}
@@ -53,12 +64,12 @@ const Login: FC<any> = ({ history }) => {
           form={form}
         >
           <Form.Item
-            rules={[{ required: true, message: 'Email is required' }]}
-            name={'email'}
+            rules={[{ required: true, message: 'Username is required' }]}
+            name={'username'}
           >
             <Col>
               <Row>
-                <LockOutlined
+                <MailOutlined
                   style={{ color: '#2C4466' }}
                   className={'text-lg mr-2 font-medium'}
                 />
@@ -66,10 +77,10 @@ const Login: FC<any> = ({ history }) => {
                   style={{ color: '#2C4466' }}
                   className={'text-lg font-medium'}
                 >
-                  Email address
+                  Username
                 </Text>
               </Row>
-              <Input className={'w-full mt-2 h-16 border-0 bg-gray-200'} />
+              <Input className={'w-full mt-2 h-16'} />
             </Col>
           </Form.Item>
           <Form.Item
@@ -87,7 +98,7 @@ const Login: FC<any> = ({ history }) => {
           >
             <Col>
               <Row>
-                <MailOutlined
+                <LockOutlined
                   style={{ color: '#2C4466' }}
                   className={'text-lg mr-2 font-medium'}
                 />
@@ -98,9 +109,7 @@ const Login: FC<any> = ({ history }) => {
                   Password
                 </Text>
               </Row>
-              <Input.Password
-                className={'w-full mt-2 h-16 border-0 bg-gray-200'}
-              />
+              <Input.Password className={'w-full mt-2 h-16 '} />
             </Col>
           </Form.Item>
           <Form.Item>
