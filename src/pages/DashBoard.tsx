@@ -151,7 +151,7 @@ const DashBoard: FC<any> = () => {
         <Col className={'h-full sticky'} span={24}>
           <Card
             className={'w-full h-60 mb-5'}
-            title={'Add skill that you want to learn'}
+            title={'Choose a profession that you want to pursuit'}
           >
             <Row className={'mb-3'}>
               <Select

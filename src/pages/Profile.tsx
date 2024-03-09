@@ -29,7 +29,7 @@ const Profile = () => {
               navigate('/dashboard');
             }}
           >
-            Dash board
+            Dashboard
           </Button>
         ),
       },
@@ -158,7 +158,9 @@ const Profile = () => {
           </Row>
         </Card>
         <Col className={'w-full'}>
-          <Text className={'text-2xl font-bold'}>Favorite courses</Text>
+          <Text className={'text-2xl font-bold'}>
+            Courses that you have learned
+          </Text>
           <Col className={'mt-4'}>
             {courses?.length > 0 ? (
               courses.map(course => renderCoursesItem(course))
