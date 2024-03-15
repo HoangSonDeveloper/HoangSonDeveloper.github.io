@@ -1,20 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  Dropdown,
-  Image,
-  Row,
-  Layout,
-  Typography,
-  Col,
-  Card,
-  Select,
-  Input,
   Button,
-  Checkbox,
+  Card,
+  Col,
+  Image,
+  Input,
+  Layout,
+  message,
   Radio,
+  Row,
+  Select,
   Tag,
+  Typography,
 } from 'antd';
 import ReactJson from 'react-json-view';
+import api from '../axios';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -25,6 +25,66 @@ const providers = [
   { label: 'Codecademy', value: 'codecademy' },
 ];
 const Process = () => {
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const [provider, setProvider] = useState();
+  const [crawlUrl, setCrawlUrl] = useState('');
+  const [crawledData, setCrawledData] = useState<{ course: any }>({
+    course: {},
+  });
+  const [mappedData, setMappedData] = useState([]);
+  const [extractedData, setExtractedData] = useState([]);
+  const [promptType, setPromptType] = useState('zero-shot');
+  const onCrawlData = async () => {
+    if (provider && !!crawlUrl) {
+      try {
+        await api
+          .post('/process/crawl', {
+            provider,
+            url: crawlUrl,
+          })
+          .then(res => setCrawledData(res?.data))
+          .then(res => messageApi.success('Crawl data successfully'));
+      } catch (e) {
+        console.log(e);
+        messageApi.error('Failed to crawl data');
+      }
+    }
+  };
+
+  const onExtractData = async () => {
+    if (!!crawledData) {
+      try {
+        await api
+          .post('/process/extraction', {
+            prompt_type: promptType,
+            content: crawledData?.course?.content,
+          })
+          .then(res => setExtractedData(res?.data?.technologies))
+          .then(res => messageApi.success('Extract data successfully'));
+      } catch (e) {
+        console.log(e);
+        messageApi.error('Failed to extract data');
+      }
+    }
+  };
+
+  const onCanonicalizeData = async () => {
+    if (!!crawledData) {
+      try {
+        await api
+          .post('/process/canonicalization', {
+            technologies: extractedData,
+          })
+          .then(res => setMappedData(res?.data?.technologies))
+          .then(res => messageApi.success('Canonicalize data successfully'));
+      } catch (e) {
+        console.log(e);
+        messageApi.error('Failed to canonicalize data');
+      }
+    }
+  };
+
   const renderHeader = () => {
     return (
       <Header>
@@ -41,12 +101,6 @@ const Process = () => {
             />
             <Text className={'text-2xl font-semibold text-white'}>
               CourseConsult
-              <Text
-                style={{ color: '#62B3ED' }}
-                className={'font-semibold text-2xl'}
-              >
-                CMS
-              </Text>
             </Text>
           </Row>
         </Row>
@@ -66,11 +120,18 @@ const Process = () => {
                   placeholder={'Select provider'}
                   className={'w-full mt-2'}
                   options={providers}
+                  onChange={value => {
+                    setProvider(value);
+                  }}
                 />
               </Col>
               <Col span={24} md={{ span: 12 }} className={'mb-4'}>
                 <Text className={'text-md font-bold'}>Course url</Text>
                 <Input
+                  onChange={e => {
+                    const { value } = e.target;
+                    setCrawlUrl(value);
+                  }}
                   placeholder={'Input course url'}
                   className={'w-full mt-2'}
                 />
@@ -84,21 +145,14 @@ const Process = () => {
                     fontWeight: 600,
                   }}
                   type={'primary'}
+                  onClick={onCrawlData}
                 >
                   Start crawling
                 </Button>
               </Col>
               <Text className={'text-md font-bold mb-2'}>Crawl result</Text>
               <Col className={'p-6 bg-gray-200 rounded-lg'} span={24}>
-                <ReactJson
-                  src={{
-                    title: 'Course Demo 1',
-                    description: 'Description for course demo 1',
-                    tutor: 'Son Nguyen',
-                    rating: 5.0,
-                    link: 'https://www.coursera.org/',
-                  }}
-                />
+                <ReactJson src={crawledData} />
               </Col>
             </Row>
           </Card>
@@ -108,11 +162,23 @@ const Process = () => {
             <Text className={'text-md font-bold'}>Prompts</Text>
             <Row className={'mt-2 mb-4'}>
               <Col className={'mr-8'}>
-                <Radio />
+                <Radio
+                  onChange={e => {
+                    setPromptType(e.target.value);
+                  }}
+                  value={'zero-shot'}
+                  checked={promptType === 'zero-shot'}
+                />
                 <Text>Zero shot prompt</Text>
               </Col>
               <Col>
-                <Radio />
+                <Radio
+                  onChange={e => {
+                    setPromptType(e.target.value);
+                  }}
+                  value={'few-shot'}
+                  checked={promptType === 'few-shot'}
+                />
                 <Text>Few shot prompt</Text>
               </Col>
             </Row>
@@ -124,6 +190,7 @@ const Process = () => {
                   color: 'white',
                   fontWeight: 600,
                 }}
+                onClick={onExtractData}
                 type={'primary'}
               >
                 Start extracting
@@ -131,7 +198,7 @@ const Process = () => {
             </Col>
             <Text className={'text-md font-bold'}>Extract result</Text>
             <Col className={'p-6 bg-gray-200 rounded-lg mt-2'} span={24}>
-              {['Course', 'Demo', 'something'].map(item => {
+              {extractedData.map(item => {
                 return <Tag>{item}</Tag>;
               })}
             </Col>
@@ -139,17 +206,6 @@ const Process = () => {
         </Col>
         <Col span={24} xxl={{ span: 12 }}>
           <Card title={'Canonicalization'}>
-            <Text className={'text-md font-bold'}>Algorithm</Text>
-            <Row className={'mt-2 mb-4'}>
-              <Col className={'mr-8'}>
-                <Radio />
-                <Text>Edit distance</Text>
-              </Col>
-              <Col>
-                <Radio />
-                <Text>Vector similarity</Text>
-              </Col>
-            </Row>
             <Col className={'mb-4'}>
               <Button
                 style={{
@@ -159,12 +215,17 @@ const Process = () => {
                   fontWeight: 600,
                 }}
                 type={'primary'}
+                onClick={onCanonicalizeData}
               >
                 Start mapping
               </Button>
             </Col>
             <Text className={'text-md font-bold'}>Mapping result</Text>
-            <Col className={'p-6 bg-gray-200 rounded-lg mt-2'} span={24}></Col>
+            <Col className={'p-6 bg-gray-200 rounded-lg mt-2'} span={24}>
+              {mappedData.map(item => {
+                return <Tag>{item}</Tag>;
+              })}
+            </Col>
           </Card>
         </Col>
       </Row>
@@ -172,6 +233,7 @@ const Process = () => {
   };
   return (
     <Layout>
+      {contextHolder}
       <>
         {renderHeader()}
         {renderContent()}

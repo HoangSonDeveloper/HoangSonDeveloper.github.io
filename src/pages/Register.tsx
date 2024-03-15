@@ -54,9 +54,6 @@ const Register: FC<any> = ({ history }) => {
           className={'text-3xl font-bold mb-6'}
         >
           CourseConsult
-          <Text style={{ color: '#62B3ED' }} className={'text-3xl font-bold'}>
-            CMS
-          </Text>
         </Text>
         <Form
           className={

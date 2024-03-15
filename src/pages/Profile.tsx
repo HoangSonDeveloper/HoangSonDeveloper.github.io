@@ -76,12 +76,6 @@ const Profile = () => {
             />
             <Text className={'text-2xl font-semibold text-white'}>
               CourseConsult
-              <Text
-                style={{ color: '#62B3ED' }}
-                className={'font-semibold text-2xl'}
-              >
-                CMS
-              </Text>
             </Text>
           </Row>
           <Row className={'h-full  flex items-center'}>
