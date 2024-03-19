@@ -1,7 +1,7 @@
 import axios, { AxiosRequestHeaders } from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://34.16.184.243:3000',
+  baseURL: 'https://34.16.184.243:3000',
   timeout: 30000,
 });
 
