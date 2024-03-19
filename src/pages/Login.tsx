@@ -9,7 +9,7 @@ import {
   Typography,
   message,
 } from 'antd';
-import { LockOutlined, MailOutlined } from '@ant-design/icons';
+import { LockOutlined, MailOutlined, SettingFilled } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from '../axios';
@@ -43,6 +43,14 @@ const Login: FC<any> = ({ history }) => {
   return (
     <Layout>
       {contextHolder}
+      <SettingFilled
+        className={
+          'pointer-events-auto hover:opacity-50 text-xl absolute top-12 right-12'
+        }
+        onClick={() => {
+          navigate('/process');
+        }}
+      />
       <Content
         style={{ height: '100vh' }}
         className={'justify-center items-center flex flex-col px-4'}
