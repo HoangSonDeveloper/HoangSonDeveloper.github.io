@@ -1,5 +1,4 @@
 import React from 'react';
-import '../src/App.css';
 import { Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './pages/ProtectedRoute';
 import Login from './pages/Login';
