@@ -6,6 +6,7 @@ import Profile from './pages/Profile';
 import Register from './pages/Register';
 import DashBoard from './pages/DashBoard';
 import Process from './pages/Process';
+import ProcessSteps from './pages/ProcessSteps';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/process" element={<Process />} />
+      <Route path="/process-steps" element={<ProcessSteps />} />
       <Route
         path="/dashboard"
         element={

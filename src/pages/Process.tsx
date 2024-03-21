@@ -1,241 +1,175 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
-  Card,
   Col,
   Image,
-  Input,
   Layout,
   message,
-  Radio,
   Row,
-  Select,
-  Tag,
+  Table,
   Typography,
 } from 'antd';
-import ReactJson from 'react-json-view';
 import api from '../axios';
+import { useNavigate } from 'react-router-dom';
+import { renderHeader } from '../utils/LayoutUtils';
 
 const { Header } = Layout;
-const { Text } = Typography;
+const { Text, Paragraph } = Typography;
 
-const providers = [
-  { label: 'Udemy', value: 'udemy' },
-  { label: 'Coursera', value: 'coursera' },
-  { label: 'Codecademy', value: 'codecademy' },
-];
 const Process = () => {
   const [messageApi, contextHolder] = message.useMessage();
+  const [courses, setCourses] = useState([]);
+  const navigate = useNavigate();
 
-  const [provider, setProvider] = useState();
-  const [crawlUrl, setCrawlUrl] = useState('');
-  const [crawledData, setCrawledData] = useState<{ course: any }>({
-    course: {},
-  });
-  const [mappedData, setMappedData] = useState([]);
-  const [extractedData, setExtractedData] = useState([]);
-  const [promptType, setPromptType] = useState('zero-shot');
-  const onCrawlData = async () => {
-    if (provider && !!crawlUrl) {
-      try {
-        await api
-          .post('/process/crawl', {
-            provider,
-            url: crawlUrl,
-          })
-          .then(res => setCrawledData(res?.data))
-          .then(res => messageApi.success('Crawl data successfully'));
-      } catch (e) {
-        console.log(e);
-        messageApi.error('Failed to crawl data');
-      }
+  useEffect(() => {
+    getCourses();
+  }, []);
+
+  const getCourses = async () => {
+    try {
+      await api.get('/courses').then(res => setCourses(res?.data?.courses));
+      messageApi.success('Load courses data successfully');
+    } catch (e) {
+      messageApi.success('Load courses data error');
     }
   };
 
-  const onExtractData = async () => {
-    if (!!crawledData) {
-      try {
-        await api
-          .post('/process/extraction', {
-            prompt_type: promptType,
-            content: crawledData?.course?.content,
-          })
-          .then(res => setExtractedData(res?.data?.technologies))
-          .then(res => messageApi.success('Extract data successfully'));
-      } catch (e) {
-        console.log(e);
-        messageApi.error('Failed to extract data');
-      }
-    }
-  };
-
-  const onCanonicalizeData = async () => {
-    if (!!crawledData) {
-      try {
-        await api
-          .post('/process/canonicalization', {
-            technologies: extractedData,
-          })
-          .then(res => setMappedData(res?.data?.technologies))
-          .then(res => messageApi.success('Canonicalize data successfully'));
-      } catch (e) {
-        console.log(e);
-        messageApi.error('Failed to canonicalize data');
-      }
-    }
-  };
-
-  const renderHeader = () => {
+  const renderTable = () => {
     return (
-      <Header>
-        <Row className={'h-full'}>
-          <Row className={'h-full flex-1 flex items-center'}>
-            <Image
-              src={require('../assets/cms_icon.png')}
-              style={{
-                width: 40,
-                height: 40,
-              }}
-              preview={false}
-              alt={'Web icon'}
-            />
-            <Text className={'text-2xl font-semibold text-white'}>
-              CourseConsult
-            </Text>
-          </Row>
-        </Row>
-      </Header>
+      <Table
+        scroll={{ x: 2000, y: 1000 }}
+        className={'w-full '}
+        dataSource={courses}
+        columns={[
+          {
+            title: 'No.',
+            key: 'index',
+            width: 80,
+            render: (text, record, index) => {
+              return (
+                <div className={'flex justify-center items-center'}>
+                  <Text style={{ fontWeight: 'bold' }}>{index + 1}</Text>
+                </div>
+              );
+            },
+            fixed: 'left',
+          },
+          {
+            title: 'Title',
+            dataIndex: 'title',
+            key: 'title',
+            fixed: 'left',
+            render: value => {
+              return (
+                <div>
+                  <Paragraph ellipsis={{ rows: 2, expandable: false }}>
+                    {value}
+                  </Paragraph>
+                </div>
+              );
+            },
+          },
+          {
+            title: 'Instructor',
+            dataIndex: 'instructor',
+            key: 'instructor',
+          },
+          {
+            title: 'Content',
+            dataIndex: 'content',
+            key: 'content',
+            width: '30%',
+            render: value => {
+              return (
+                <div>
+                  <Paragraph ellipsis={{ rows: 2, expandable: false }}>
+                    {value}
+                  </Paragraph>
+                </div>
+              );
+            },
+          },
+          {
+            title: 'Description',
+            dataIndex: 'description',
+            key: 'description',
+            render: value => {
+              return (
+                <div>
+                  <Paragraph ellipsis={{ rows: 2, expandable: false }}>
+                    {value}
+                  </Paragraph>
+                </div>
+              );
+            },
+          },
+          {
+            title: 'Rating',
+            dataIndex: 'rating',
+            key: 'rating',
+            width: 80,
+            render: value => {
+              let ratingColor = 'green';
+              if (value < 3.5) {
+                ratingColor = 'orange';
+              }
+              if (value < 2.5) {
+                ratingColor = 'red';
+              }
+              return (
+                <div className={'flex justify-center items-center'}>
+                  <Text style={{ color: ratingColor, fontWeight: 'bold' }}>
+                    {value}
+                  </Text>
+                </div>
+              );
+            },
+          },
+          {
+            title: 'Url',
+            dataIndex: 'url',
+            key: 'url',
+            width: 300,
+            render: value => {
+              return (
+                <a target="_blank" className={'font-semibold'} href={value}>
+                  {value}
+                </a>
+              );
+            },
+          },
+        ]}
+      />
     );
   };
 
   const renderContent = () => {
     return (
       <Row gutter={[24, 24]} className={'p-8'}>
-        <Col span={24} xxl={{ span: 12 }}>
-          <Card title={'Crawl data'}>
-            <Row gutter={16}>
-              <Col span={24} md={{ span: 12 }} className={'mb-4'}>
-                <Text className={'text-md font-bold'}>Providers</Text>
-                <Select
-                  placeholder={'Select provider'}
-                  className={'w-full mt-2'}
-                  options={providers}
-                  onChange={value => {
-                    setProvider(value);
-                  }}
-                />
-              </Col>
-              <Col span={24} md={{ span: 12 }} className={'mb-4'}>
-                <Text className={'text-md font-bold'}>Course url</Text>
-                <Input
-                  onChange={e => {
-                    const { value } = e.target;
-                    setCrawlUrl(value);
-                  }}
-                  placeholder={'Input course url'}
-                  className={'w-full mt-2'}
-                />
-              </Col>
-              <Col span={24} className={'mb-4'}>
-                <Button
-                  style={{
-                    background: '#198754',
-                    textTransform: 'uppercase',
-                    color: 'white',
-                    fontWeight: 600,
-                  }}
-                  type={'primary'}
-                  onClick={onCrawlData}
-                >
-                  Start crawling
-                </Button>
-              </Col>
-              <Text className={'text-md font-bold mb-2'}>Crawl result</Text>
-              <Col className={'p-6 bg-gray-200 rounded-lg'} span={24}>
-                <ReactJson src={crawledData} />
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-        <Col span={24} xxl={{ span: 12 }}>
-          <Card title={'Extraction'}>
-            <Text className={'text-md font-bold'}>Prompts</Text>
-            <Row className={'mt-2 mb-4'}>
-              <Col className={'mr-8'}>
-                <Radio
-                  onChange={e => {
-                    setPromptType(e.target.value);
-                  }}
-                  value={'zero-shot'}
-                  checked={promptType === 'zero-shot'}
-                />
-                <Text>Zero shot prompt</Text>
-              </Col>
-              <Col>
-                <Radio
-                  onChange={e => {
-                    setPromptType(e.target.value);
-                  }}
-                  value={'few-shot'}
-                  checked={promptType === 'few-shot'}
-                />
-                <Text>Few shot prompt</Text>
-              </Col>
-            </Row>
-            <Col className={'mb-4'}>
-              <Button
-                style={{
-                  background: '#198754',
-                  textTransform: 'uppercase',
-                  color: 'white',
-                  fontWeight: 600,
-                }}
-                onClick={onExtractData}
-                type={'primary'}
-              >
-                Start extracting
-              </Button>
-            </Col>
-            <Text className={'text-md font-bold'}>Extract result</Text>
-            <Col className={'p-6 bg-gray-200 rounded-lg mt-2'} span={24}>
-              {extractedData.map(item => {
-                return <Tag>{item}</Tag>;
-              })}
-            </Col>
-          </Card>
-        </Col>
-        <Col span={24} xxl={{ span: 12 }}>
-          <Card title={'Canonicalization'}>
-            <Col className={'mb-4'}>
-              <Button
-                style={{
-                  background: '#198754',
-                  textTransform: 'uppercase',
-                  color: 'white',
-                  fontWeight: 600,
-                }}
-                type={'primary'}
-                onClick={onCanonicalizeData}
-              >
-                Start mapping
-              </Button>
-            </Col>
-            <Text className={'text-md font-bold'}>Mapping result</Text>
-            <Col className={'p-6 bg-gray-200 rounded-lg mt-2'} span={24}>
-              {mappedData.map(item => {
-                return <Tag>{item}</Tag>;
-              })}
-            </Col>
-          </Card>
+        <Col span={24}>{renderTable()}</Col>
+        <Col span={24} className={'flex justify-center'}>
+          <Button
+            style={{
+              background: '#198754',
+              textTransform: 'uppercase',
+              color: 'white',
+              fontWeight: 600,
+            }}
+            type={'primary'}
+            onClick={() => navigate('/process-steps')}
+          >
+            Data process steps
+          </Button>
         </Col>
       </Row>
     );
   };
+
   return (
     <Layout>
       {contextHolder}
       <>
-        {renderHeader()}
+        {renderHeader(navigate)}
         {renderContent()}
       </>
     </Layout>
