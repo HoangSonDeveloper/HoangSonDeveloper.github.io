@@ -3,48 +3,33 @@ import {
   Button,
   Card,
   Col,
-  Dropdown,
-  Image,
   Layout,
   message,
   Row,
   Select,
-  Table,
   Typography,
 } from 'antd';
 import { useAuth } from '../context/AuthContext';
 import api from '../axios';
 import { useNavigate } from 'react-router-dom';
+import { renderHeader } from '../utils/LayoutUtils';
 
-const { Header } = Layout;
 const { Text } = Typography;
 
 const DashBoard: FC<any> = () => {
   const { logout } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState('');
-  const [favCourses, setFavCourses] = useState([]);
   const [recommendCourses, setRecommendCourses] = useState([]);
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     getCourses();
-    getFavCourses();
   }, []);
 
   const getCourses = async () => {
     await api.get('/jobs').then(res => setJobs(res?.data?.titles));
-  };
-
-  const getFavCourses = async () => {
-    try {
-      await api
-        .get('/user/courses')
-        .then(res => setFavCourses(res?.data?.courses));
-    } catch (e) {
-      console.log('Error on getting courses!!!', e);
-    }
   };
 
   const onFindCourses = async () => {
@@ -64,8 +49,8 @@ const DashBoard: FC<any> = () => {
     try {
       await api
         .post('/user/courses', { courses_uid: [courseUid] })
-        .then(res => {
-          getFavCourses();
+        .then(async res => {
+          await onFindCourses();
           messageApi.success('Add course successfully');
         });
     } catch (e) {
@@ -104,40 +89,6 @@ const DashBoard: FC<any> = () => {
         ),
       },
     ],
-  };
-
-  const renderHeader = () => {
-    return (
-      <Header>
-        <Row className={'h-full'}>
-          <Row className={'h-full flex-1 flex items-center'}>
-            <Image
-              src={require('../assets/cms_icon.png')}
-              style={{
-                width: 40,
-                height: 40,
-              }}
-              preview={false}
-              alt={'Web icon'}
-            />
-            <Text className={'text-2xl font-semibold text-white'}>
-              CourseConsult
-            </Text>
-          </Row>
-          <Row className={'h-full  flex items-center'}>
-            <Dropdown menu={dropDownItems}>
-              <Image
-                src={
-                  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=2980&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-                }
-                style={{ width: 52, height: 52, borderRadius: 26 }}
-                preview={false}
-              />
-            </Dropdown>
-          </Row>
-        </Row>
-      </Header>
-    );
   };
 
   const renderContent = () => {
@@ -214,12 +165,15 @@ const DashBoard: FC<any> = () => {
                   </Text>
                   <a
                     style={{ fontSize: 16 }}
-                    className={'font-bold'}
+                    className={'font-bold flex'}
                     target="_blank"
                     href={course?.url}
                   >
                     Go to course
                   </a>
+                  <Text>
+                    {`Necessity score: ${course?.necessity_score} - Added score: ${course?.added_score}`}
+                  </Text>
                 </Col>
                 <Button onClick={() => onAddUserCourse(course?.uid)}>
                   Add to favorite
@@ -236,7 +190,7 @@ const DashBoard: FC<any> = () => {
     <Layout>
       {contextHolder}
       <>
-        {renderHeader()}
+        {renderHeader(navigate, logout, true, dropDownItems)}
         {renderContent()}
       </>
     </Layout>
