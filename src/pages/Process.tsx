@@ -138,6 +138,12 @@ const Process = () => {
               );
             },
           },
+          {
+            title: 'Created at',
+            dataIndex: 'created_at',
+            key: 'url',
+            width: 300,
+          },
         ]}
       />
     );

@@ -7,14 +7,29 @@ import {
   message,
   Row,
   Select,
+  Tag,
   Typography,
 } from 'antd';
+import { HeartFilled } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 import api from '../axios';
 import { useNavigate } from 'react-router-dom';
 import { renderHeader } from '../utils/LayoutUtils';
 
 const { Text } = Typography;
+const tagColors = [
+  'magenta',
+  'red',
+  'volcano',
+  'orange',
+  'gold',
+  'lime',
+  'green',
+  'cyan',
+  'blue',
+  'geekblue',
+  'purple',
+];
 
 const DashBoard: FC<any> = () => {
   const { logout } = useAuth();
@@ -64,6 +79,10 @@ const DashBoard: FC<any> = () => {
       label: job,
     };
   });
+
+  const getRandomColor = () => {
+    return tagColors[Math.floor(Math.random() * tagColors.length)];
+  };
 
   const dropDownItems = {
     items: [
@@ -143,6 +162,9 @@ const DashBoard: FC<any> = () => {
                   <Text className={'text-lg font-bold flex'}>
                     {course?.title}
                   </Text>
+                  <Text style={{ color: '#727272' }}>
+                    {`Necessity score: ${course?.necessity_score} - Added score: ${course?.added_score}`}
+                  </Text>
                   <Text style={{ fontSize: 16 }} className={'flex'}>
                     {course?.description}
                   </Text>
@@ -163,20 +185,34 @@ const DashBoard: FC<any> = () => {
                       {course?.rating}
                     </Text>
                   </Text>
+                  <Row className={'my-4'}>
+                    {course?.technologies?.map(item => {
+                      return <Tag color={getRandomColor()}>{item}</Tag>;
+                    })}
+                  </Row>
                   <a
-                    style={{ fontSize: 16 }}
+                    style={{ fontSize: 16, color: '#2C73D2' }}
                     className={'font-bold flex'}
                     target="_blank"
                     href={course?.url}
                   >
                     Go to course
                   </a>
-                  <Text>
-                    {`Necessity score: ${course?.necessity_score} - Added score: ${course?.added_score}`}
-                  </Text>
                 </Col>
-                <Button onClick={() => onAddUserCourse(course?.uid)}>
-                  Add to favorite
+                <Button
+                  style={{
+                    position: 'absolute',
+                    top: 24,
+                    right: 24,
+                    width: 52,
+                    height: 52,
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  onClick={() => onAddUserCourse(course?.uid)}
+                >
+                  <HeartFilled style={{ fontSize: 20 }} />
                 </Button>
               </Card>
             );
